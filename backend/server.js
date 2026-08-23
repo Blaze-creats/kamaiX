@@ -13,6 +13,28 @@ const { load, save } = require('./db');
 const PORT = process.env.PORT || 3000;
 const ADMIN_KEY = process.env.ADMIN_KEY || 'admin123'; // change this before any real deployment
 
+// Real SMS: sign up at msg91.com (India-friendly, has free trial credits), get an
+// Auth Key + OTP Template ID from their dashboard, then set these as environment
+// variables on Render (Dashboard -> your service -> Environment). Until both are
+// set, the app automatically falls back to demo mode (fixed code 123456) so it
+// keeps working while you're setting things up.
+const MSG91_AUTH_KEY = process.env.MSG91_AUTH_KEY || '';
+const MSG91_TEMPLATE_ID = process.env.MSG91_TEMPLATE_ID || '';
+const SMS_CONFIGURED = Boolean(MSG91_AUTH_KEY && MSG91_TEMPLATE_ID);
+
+function generateOtp() {
+  return String(Math.floor(100000 + Math.random() * 900000));
+}
+
+// Sends a real SMS via MSG91. Returns true if MSG91 accepted the request.
+// Throws on network error so the caller can fall back gracefully.
+async function sendRealSms(phone, otp) {
+  const url = `https://api.msg91.com/api/v5/otp?template_id=${MSG91_TEMPLATE_ID}&mobile=91${phone}&authkey=${MSG91_AUTH_KEY}&otp=${otp}`;
+  const response = await fetch(url);
+  const data = await response.json();
+  return data.type === 'success';
+}
+
 // ---------- helpers ----------
 function sendJSON(res, status, obj) {
   const body = JSON.stringify(obj);
@@ -64,19 +86,31 @@ async function handleSendOtp(req, res) {
   const { phone } = await readBody(req);
   if (!phone || phone.length < 10) return sendJSON(res, 400, { error: 'valid phone required' });
 
-  // MOCK: in production call MSG91/Twilio here instead of hardcoding
-  const otp = '123456';
+  const otp = SMS_CONFIGURED ? generateOtp() : '123456';
   db.otps[phone] = otp;
   save(db);
 
-  console.log(`[MOCK SMS] OTP for ${phone}: ${otp}`);
-  sendJSON(res, 200, { message: 'OTP sent (mock: it is always 123456 in this MVP)' });
+  if (!SMS_CONFIGURED) {
+    console.log(`[DEMO MODE — no SMS provider configured] OTP for ${phone}: ${otp}`);
+    return sendJSON(res, 200, { message: 'Demo mode: no SMS sent. Use code 123456.', demo: true });
+  }
+
+  try {
+    const sent = await sendRealSms(phone, otp);
+    if (sent) return sendJSON(res, 200, { message: 'Code sent to your phone.' });
+    console.error('MSG91 rejected the request for', phone);
+    return sendJSON(res, 502, { error: 'Could not send SMS right now. Please try again.' });
+  } catch (err) {
+    console.error('SMS send failed:', err.message);
+    return sendJSON(res, 502, { error: 'Could not reach SMS provider. Please try again.' });
+  }
 }
 
 async function handleVerifyOtp(req, res) {
   const db = load();
   const { phone, otp } = await readBody(req);
-  if (db.otps[phone] !== otp) return sendJSON(res, 401, { error: 'invalid OTP' });
+  if (!db.otps[phone] || db.otps[phone] !== otp) return sendJSON(res, 401, { error: 'Invalid or expired code.' });
+  delete db.otps[phone]; // one-time use — can't be replayed
 
   let user = db.users.find((u) => u.phone === phone);
   if (!user) {
