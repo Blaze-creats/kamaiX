@@ -32,4 +32,3 @@ function save(data) {
 }
 
 module.exports = { load, save };
-
