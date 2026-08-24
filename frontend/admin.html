@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KamaiX Admin</title>
+<style>
+  body { margin: 0; font-family: -apple-system, sans-serif; background: #f5f4fb; padding: 20px 14px 60px; color: #15141f; }
+  .shell { max-width: 480px; margin: 0 auto; }
+  h1 { font-size: 18px; }
+  .card { background: #fff; border-radius: 14px; padding: 14px; margin-bottom: 12px; box-shadow: 0 4px 14px -6px rgba(0,0,0,0.15); }
+  input { width: 100%; padding: 11px; border-radius: 10px; border: 1px solid #ddd; font-size: 14px; margin-bottom: 10px; box-sizing: border-box; }
+  button { background: #5b4fe9; color: #fff; border: none; padding: 10px 16px; border-radius: 10px; font-weight: 600; cursor: pointer; }
+  button:hover { background: #4a3fd6; }
+  button.approve { background: #16a34a; font-size: 12.5px; padding: 6px 12px; }
+  .row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; font-size: 13.5px; }
+  .row:last-child { border-bottom: none; }
+  .muted { color: #7a7889; font-size: 12px; }
+  .status-pending { color: #eab308; font-weight: 600; }
+  .status-approved { color: #16a34a; font-weight: 600; }
+  .tabs { display: flex; gap: 8px; margin: 14px 0; }
+  .tab { flex: 1; text-align: center; padding: 8px; background: #eceafa; border-radius: 10px; font-size: 13px; cursor: pointer; }
+  .tab.active { background: #5b4fe9; color: #fff; }
+</style>
+</head>
+<body>
+<div class="shell" id="app"></div>
+<script>
+// Set this to your deployed backend URL (same one used in frontend/index.html)
+const API_BASE = 'http://localhost:3000/api';
+let state = { adminKey: sessionStorage.getItem('adminKey') || '', tab: 'withdrawals' };
+
+async function api(path, opts = {}) {
+  const headers = { 'Content-Type': 'application/json', 'x-admin-key': state.adminKey, ...(opts.headers || {}) };
+  try {
+    const res = await fetch(API_BASE + path, { ...opts, headers });
+    return await res.json();
+  } catch {
+    return { error: 'Could not reach server.' };
+  }
+}
+
+function render() {
+  const el = document.getElementById('app');
+  if (!state.adminKey) return renderLogin(el);
+  renderDashboard(el);
+}
+
+function renderLogin(el) {
+  el.innerHTML = `
+    <h1>KamaiX Admin</h1>
+    <div class="card">
+      <input id="key" type="password" placeholder="Admin key" />
+      <button onclick="login()">Enter</button>
+    </div>
+  `;
+}
+
+function login() {
+  state.adminKey = document.getElementById('key').value.trim();
+  sessionStorage.setItem('adminKey', state.adminKey);
+  render();
+}
+
+async function renderDashboard(el) {
+  el.innerHTML = `
+    <h1>KamaiX Admin</h1>
+    <div class="tabs">
+      <div class="tab ${state.tab==='withdrawals'?'active':''}" onclick="setTab('withdrawals')">Withdrawals</div>
+      <div class="tab ${state.tab==='users'?'active':''}" onclick="setTab('users')">Users</div>
+    </div>
+    <div id="content" class="card">Loading...</div>
+  `;
+  if (state.tab === 'withdrawals') renderWithdrawals();
+  else renderUsers();
+}
+
+function setTab(t) { state.tab = t; render(); }
+
+async function renderWithdrawals() {
+  const r = await api('/admin/withdrawals');
+  const box = document.getElementById('content');
+  if (r.error) { box.innerHTML = `<p class="muted">${r.error} (check admin key)</p>`; return; }
+  if (!r.withdrawals.length) { box.innerHTML = `<p class="muted">No withdrawal requests yet.</p>`; return; }
+  box.innerHTML = r.withdrawals.slice().reverse().map(w => `
+    <div class="row">
+      <div>
+        <div>₹${w.amount} → ${w.upiId}</div>
+        <div class="muted">${new Date(w.createdAt).toLocaleString()}</div>
+      </div>
+      <div>
+        ${w.status === 'pending'
+          ? `<button class="approve" onclick="approve('${w.id}')">Mark Paid</button>`
+          : `<span class="status-${w.status}">${w.status}</span>`}
+      </div>
+    </div>
+  `).join('');
+}
+
+async function approve(id) {
+  if (!confirm('Confirm you have ALREADY sent this UPI payment manually before marking it paid.')) return;
+  await api(`/admin/withdrawals/${id}/approve`, { method: 'POST' });
+  renderWithdrawals();
+}
+
+async function renderUsers() {
+  const r = await api('/admin/users');
+  const box = document.getElementById('content');
+  if (r.error) { box.innerHTML = `<p class="muted">${r.error}</p>`; return; }
+  box.innerHTML = r.users.map(u => `
+    <div class="row">
+      <div>${u.email}</div>
+      <div>₹${u.balance}</div>
+    </div>
+  `).join('') || `<p class="muted">No users yet.</p>`;
+}
+
+render();
+</script>
+</body>
+</html>
