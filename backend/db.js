@@ -8,8 +8,8 @@ const DB_FILE = path.join(__dirname, 'data.json');
 function load() {
   if (!fs.existsSync(DB_FILE)) {
     const initial = {
-      users: [],          // {id, phone, createdAt}
-      otps: {},           // phone -> otp (mock only)
+      users: [],          // {id, email, createdAt}
+      otps: {},           // email -> otp (mock only)
       tokens: {},         // token -> userId
       offers: [
         { id: 'off_1', title: 'Install "PhotoEdit Pro" & open it once', reward: 15, network: 'MockNetwork', category: 'App Install' },
