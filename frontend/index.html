@@ -6,6 +6,7 @@
 <title>KamaiX — Earn on your time</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   :root {
     --bg: #f5f4fb;
@@ -67,6 +68,277 @@
     color: var(--ink-muted); border-radius: 999px; cursor: pointer; transition: all 0.2s ease;
   }
   .tab.active { background: #fff; color: var(--ink); box-shadow: var(--shadow); }
+
+  .content { min-height: 320px; }
+
+  /* Task cards */
+  .task-card {
+    background: var(--card); border-radius: 18px; padding: 16px;
+    display: flex; align-items: center; gap: 12px;
+    box-shadow: var(--shadow); margin-bottom: 12px;
+    transition: transform 0.15s ease;
+  }
+  .task-icon {
+    width: 42px; height: 42px; border-radius: 12px; background: var(--primary-soft);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--primary);
+  }
+  .task-body { flex: 1; min-width: 0; }
+  .task-title { font-size: 14.5px; font-weight: 600; margin: 0 0 2px; line-height: 1.35; }
+  .task-meta { font-size: 11.5px; color: var(--ink-muted); }
+  .task-right { text-align: right; flex-shrink: 0; }
+  .task-reward { display: inline-block; background: var(--lime); color: #2b3a00; font-weight: 700; font-size: 12.5px; padding: 3px 9px; border-radius: 999px; margin-bottom: 8px; }
+
+  .pill-btn {
+    font-size: 12px; font-weight: 600; background: var(--primary); color: #fff;
+    border: none; padding: 7px 14px; border-radius: 999px; cursor: pointer;
+  }
+  .pill-btn:hover { background: #4a3fd6; }
+  .pill-btn:disabled { opacity: 0.5; cursor: default; }
+  .pending-tag { font-size: 11.5px; color: var(--ink-muted); display: flex; align-items: center; gap: 5px; }
+  .dot { width: 5px; height: 5px; border-radius: 50%; background: #f59e0b; animation: pulse 1s infinite ease-in-out; }
+  @keyframes pulse { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
+  .done-badge {
+    display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600;
+    color: var(--credit); animation: pop 0.3s cubic-bezier(.3,1.6,.5,1) both;
+  }
+  @keyframes pop { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
+
+  .hint-card { background: var(--primary-soft); border-radius: 14px; padding: 13px 15px; font-size: 12px; color: #4a3fbf; line-height: 1.5; margin-top: 6px; }
+
+  /* Ledger / activity list */
+  .txn-row { display: flex; align-items: center; gap: 12px; background: var(--card); border-radius: 16px; padding: 13px 15px; margin-bottom: 10px; box-shadow: var(--shadow); }
+  .txn-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .txn-icon.credit { background: #dcfce7; color: var(--credit); }
+  .txn-icon.debit { background: #fee2e2; color: var(--debit); }
+  .txn-desc { flex: 1; font-size: 13.5px; font-weight: 500; }
+  .txn-amt { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 14px; }
+  .txn-amt.credit { color: var(--credit); }
+  .txn-amt.debit { color: var(--debit); }
+  .empty { text-align: center; padding: 50px 10px; color: var(--ink-muted); font-size: 13.5px; }
+
+  /* Withdraw */
+  .form-card { background: var(--card); border-radius: 20px; padding: 20px; box-shadow: var(--shadow); }
+  label { display: block; font-size: 12px; font-weight: 600; color: var(--ink-muted); margin: 14px 0 6px; }
+  label:first-of-type { margin-top: 0; }
+  input {
+    width: 100%; padding: 13px 14px; border: 1.5px solid var(--border); border-radius: 12px;
+    background: #fafafd; color: var(--ink); font-family: 'Inter', sans-serif; font-size: 14.5px;
+  }
+  input:focus { outline: none; border-color: var(--primary); background: #fff; }
+  button.primary {
+    width: 100%; margin-top: 18px; background: linear-gradient(135deg, var(--primary), var(--primary-2));
+    color: #fff; border: none; padding: 14px; border-radius: 14px; font-weight: 700; font-size: 14.5px;
+    cursor: pointer; font-family: 'Inter', sans-serif;
+  }
+  button.primary:hover { filter: brightness(1.05); }
+  button.primary:focus-visible, .pill-btn:focus-visible, .tab:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+  .msg { font-size: 12.5px; color: var(--ink-muted); margin-top: 10px; min-height: 16px; line-height: 1.5; }
+
+  /* Login */
+  .login-hero { text-align: center; padding: 8px 4px 22px; }
+  .login-hero .badge { display: inline-block; background: var(--primary-soft); color: var(--primary); font-size: 11.5px; font-weight: 600; padding: 5px 12px; border-radius: 999px; margin-bottom: 14px; }
+  .login-hero h1 { font-size: 24px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
+  .login-hero p { font-size: 13.5px; color: var(--ink-muted); margin: 0; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="shell" id="app"></div>
+
+<script>
+// Point this at your deployed backend URL when you host the frontend as a real website.
+const API_BASE = 'http://localhost:3000/api';
+let state = { token: safeGet('token'), email: '', tab: 'offers' };
+
+function safeGet(k) { try { return localStorage.getItem(k); } catch { return null; } }
+function safeSet(k, v) { try { localStorage.setItem(k, v); } catch {} }
+
+async function api(path, opts = {}) {
+  const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
+  if (state.token) headers['Authorization'] = 'Bearer ' + state.token;
+  try {
+    const res = await fetch(API_BASE + path, { ...opts, headers });
+    let data;
+    try { data = await res.json(); } catch { data = {}; }
+    if (!res.ok && !data.error) data.error = `Server error (${res.status}). Please try again.`;
+    return data;
+  } catch (err) {
+    return { error: 'Could not reach the server. Check your connection — the backend may also be waking up (~30s on free hosting).' };
+  }
+}
+
+const icons = {
+  tasks: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>`,
+  wallet: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/><path d="M16 12h.01M3 9h18"/></svg>`,
+  withdraw: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>`,
+  up: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>`,
+  down: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>`,
+  check: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>`,
+};
+
+function render() {
+  const el = document.getElementById('app');
+  if (!state.token) return renderLogin(el);
+  renderMain(el);
+}
+
+// Get a free Client ID at console.cloud.google.com (Credentials -> Create
+// Credentials -> OAuth Client ID -> Web application), then paste it here.
+const GOOGLE_CLIENT_ID = '107686843823-8jkrt3te2qv1hfrrs33j85sdcv497e7m.apps.googleusercontent.com';
+
+function renderLogin(el) {
+  el.innerHTML = `
+    <div class="login-hero">
+      <span class="badge">Welcome to KamaiX</span>
+      <h1>Earn on your <span style="color:var(--primary)">time</span></h1>
+      <p>Sign in with your Google account to get started.</p>
+    </div>
+    <div class="form-card" style="display:flex; flex-direction:column; align-items:center; gap:12px;">
+      <div id="g_id_signin"></div>
+      <p class="msg" id="loginMsg"></p>
+    </div>
+  `;
+  if (window.google && window.google.accounts) {
+    google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleGoogleCredential });
+    google.accounts.id.renderButton(document.getElementById('g_id_signin'), { theme: 'outline', size: 'large', width: 260 });
+  } else {
+    document.getElementById('loginMsg').innerText = 'Could not load Google Sign-In. Check your connection and reload.';
+  }
+}
+
+async function handleGoogleCredential(response) {
+  document.getElementById('loginMsg').innerText = 'Signing in…';
+  const r = await api('/auth/google', { method: 'POST', body: JSON.stringify({ credential: response.credential }) });
+  if (r.token) {
+    state.token = r.token;
+    state.email = r.user.email;
+    safeSet('token', r.token);
+    render();
+  } else {
+    document.getElementById('loginMsg').innerText = r.error || 'Sign-in failed.';
+  }
+}
+
+
+async function renderMain(el) {
+  const wallet = await api('/wallet');
+  if (wallet.error === 'unauthorized') {
+    // Session expired (e.g. backend restarted and lost old sessions) — force fresh login instead of getting stuck.
+    state.token = '';
+    safeSet('token', '');
+    return render();
+  }
+  el.innerHTML = `
+    <div class="topbar">
+      <div class="wordmark">Kamai<span>X</span></div>
+      <div class="acct-chip">${state.email || 'account'}</div>
+      <span class="muted" style="margin-left:auto; cursor:pointer; text-decoration:underline; font-size:12px;" onclick="logout()">Sign out</span>
+    </div>
+    </div>
+    ${wallet.error ? `<div class="hint-card" style="margin-bottom:14px;">⚠️ ${wallet.error}</div>` : ''}
+    <div class="balance-card">
+      <div class="balance-label">Total balance</div>
+      <div class="balance-amount">₹${wallet.balance ?? 0}</div>
+      <div class="balance-sub">Available to withdraw</div>
+    </div>
+    <div class="tabs">
+      <div class="tab ${state.tab==='offers'?'active':''}" onclick="setTab('offers')" tabindex="0">Tasks</div>
+      <div class="tab ${state.tab==='wallet'?'active':''}" onclick="setTab('wallet')" tabindex="0">Activity</div>
+      <div class="tab ${state.tab==='withdraw'?'active':''}" onclick="setTab('withdraw')" tabindex="0">Withdraw</div>
+    </div>
+    <div class="content" id="tabContent"></div>
+  `;
+  if (state.tab === 'offers') renderOffers();
+  else if (state.tab === 'wallet') renderWallet(wallet);
+  else renderWithdraw(wallet);
+}
+
+function setTab(t) { state.tab = t; render(); }
+
+function logout() {
+  state.token = '';
+  safeSet('token', '');
+  if (window.google && window.google.accounts) google.accounts.id.disableAutoSelect();
+  render();
+}
+
+async function renderOffers() {
+  const { offers } = await api('/offers');
+  const box = document.getElementById('tabContent');
+  box.innerHTML = offers.map(o => `
+    <div class="task-card">
+      <div class="task-icon">${icons.tasks}</div>
+      <div class="task-body">
+        <p class="task-title">${o.title}</p>
+        <p class="task-meta">${o.category}</p>
+      </div>
+      <div class="task-right">
+        <div class="task-reward">+₹${o.reward}</div>
+        <div id="action-${o.id}"><button class="pill-btn" onclick="doOffer('${o.id}')">Mark done</button></div>
+      </div>
+    </div>
+  `).join('');
+  box.innerHTML += `<div class="hint-card">Marking a task done starts verification. It's credited once confirmed — just like a deposit clears before it's spendable.</div>`;
+}
+
+async function doOffer(offerId) {
+  const actionBox = document.getElementById(`action-${offerId}`);
+  actionBox.innerHTML = `<span class="pending-tag"><span class="dot"></span>Verifying</span>`;
+  const r = await api(`/offers/${offerId}/complete`, { method: 'POST' });
+  if (r.error) { actionBox.innerHTML = `<span class="pending-tag">${r.error}</span>`; return; }
+  setTimeout(async () => {
+    await api('/webhook/postback-simulate', {
+      method: 'POST',
+      body: JSON.stringify({ completionId: r.completion.id, result: 'confirmed' }),
+    });
+    actionBox.innerHTML = `<span class="done-badge">${icons.check} Confirmed</span>`;
+  }, 1400);
+}
+
+function renderWallet(wallet) {
+  const box = document.getElementById('tabContent');
+  const transactions = wallet.transactions || [];
+  if (!transactions.length) {
+    box.innerHTML = `<div class="empty">No activity yet.<br>Complete a task to see it here.</div>`;
+    return;
+  }
+  box.innerHTML = transactions.map(t => `
+    <div class="txn-row">
+      <div class="txn-icon ${t.type}">${t.type === 'credit' ? icons.down : icons.up}</div>
+      <div class="txn-desc">${t.reason}</div>
+      <div class="txn-amt ${t.type}">${t.type === 'credit' ? '+' : '−'}₹${t.amount}</div>
+    </div>
+  `).join('');
+}
+
+function renderWithdraw(wallet) {
+  const box = document.getElementById('tabContent');
+  const balance = wallet.balance ?? 0;
+  box.innerHTML = `
+    <div class="form-card">
+      <label>Available balance</label>
+      <div class="balance-amount" style="color:var(--credit); font-size:28px;">₹${balance}</div>
+      <label>UPI ID</label>
+      <input id="upi" placeholder="name@upi" />
+      <label>Amount (min ₹50)</label>
+      <input id="amt" type="number" placeholder="0" />
+      <button class="primary" onclick="submitWithdraw()">Withdraw now</button>
+      <p class="msg" id="wdMsg"></p>
+    </div>
+  `;
+}
+
+async function submitWithdraw() {
+  const upiId = document.getElementById('upi').value.trim();
+  const amount = Number(document.getElementById('amt').value);
+  const r = await api('/withdraw', { method: 'POST', body: JSON.stringify({ upiId, amount }) });
+  document.getElementById('wdMsg').innerText = r.error || 'Withdrawal requested — pending approval.';
+  if (!r.error) render();
+}
+
+render();
+</script>
+</body>
+</html>
 
   .content { min-height: 320px; }
 
