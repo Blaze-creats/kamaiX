@@ -302,4 +302,3 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, () => console.log(`API running on http://localhost:${PORT}`));
-
