@@ -6,7 +6,7 @@
 <title>KamaiX — Earn on your time</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://accounts.google.com/gsi/client" async defer onload="if (typeof render === 'function' && !state.token) render();"></script>
 <style>
   :root {
     --bg: #f5f4fb;
@@ -146,7 +146,7 @@
 
 <script>
 // Point this at your deployed backend URL when you host the frontend as a real website.
-const API_BASE = 'https://kamai-passbook.onrender.com/api';
+const API_BASE = 'http://localhost:3000/api';
 let state = { token: safeGet('token'), email: '', tab: 'offers' };
 
 function safeGet(k) { try { return localStorage.getItem(k); } catch { return null; } }
@@ -339,3 +339,4 @@ render();
 </script>
 </body>
 </html>
+
