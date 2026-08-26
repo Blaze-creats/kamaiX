@@ -53,7 +53,7 @@ function sendJSON(res, status, obj) {
   res.writeHead(status, {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-admin-key',
     'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
   });
   res.end(body);
