@@ -27,7 +27,7 @@
 <div class="shell" id="app"></div>
 <script>
 // Set this to your deployed backend URL (same one used in frontend/index.html)
-const API_BASE = 'https://kamai-passbook.onrender.com/api';
+const API_BASE = 'http://localhost:3000/api';
 let state = { adminKey: sessionStorage.getItem('adminKey') || '', tab: 'withdrawals' };
 
 async function api(path, opts = {}) {
@@ -108,11 +108,25 @@ async function renderUsers() {
   const box = document.getElementById('content');
   if (r.error) { box.innerHTML = `<p class="muted">${r.error}</p>`; return; }
   box.innerHTML = r.users.map(u => `
-    <div class="row">
-      <div>${u.email}</div>
-      <div>₹${u.balance}</div>
+    <div class="row" style="align-items:flex-start;">
+      ${u.picture ? `<img src="${u.picture}" style="width:34px;height:34px;border-radius:50%;margin-right:10px;" referrerpolicy="no-referrer" />` : ''}
+      <div style="flex:1;">
+        <div style="font-weight:600;">${u.name || '(no name)'}</div>
+        <div class="muted">${u.email}</div>
+        <div class="muted">₹${u.balance} · joined ${new Date(u.createdAt).toLocaleDateString()}</div>
+      </div>
+      <button class="${u.banned ? 'approve' : ''}" style="${u.banned ? '' : 'background:#ef4444;'} font-size:12px; padding:6px 12px;" onclick="toggleBan('${u.id}', ${!u.banned})">
+        ${u.banned ? 'Unban' : 'Ban'}
+      </button>
     </div>
   `).join('') || `<p class="muted">No users yet.</p>`;
+}
+
+async function toggleBan(id, ban) {
+  const msg = ban ? 'Ban this user? They will be signed out immediately and unable to sign in again.' : 'Unban this user?';
+  if (!confirm(msg)) return;
+  await api(`/admin/users/${id}/ban`, { method: 'POST', body: JSON.stringify({ banned: ban }) });
+  renderUsers();
 }
 
 render();
