@@ -27,7 +27,7 @@
 <div class="shell" id="app"></div>
 <script>
 // Set this to your deployed backend URL (same one used in frontend/index.html)
-const API_BASE = 'http://localhost:3000/api';
+const API_BASE = 'https://kamai-passbook.onrender.com/api';
 let state = { adminKey: sessionStorage.getItem('adminKey') || '', tab: 'withdrawals' };
 
 async function api(path, opts = {}) {
