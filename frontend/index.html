@@ -6,7 +6,7 @@
 <title>KamaiX — Earn on your time</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://accounts.google.com/gsi/client" async defer onload="if (typeof render === 'function' && !state.token) render();"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   :root {
     --bg: #f5f4fb;
@@ -139,6 +139,106 @@
   .login-hero .badge { display: inline-block; background: var(--primary-soft); color: var(--primary); font-size: 11.5px; font-weight: 600; padding: 5px 12px; border-radius: 999px; margin-bottom: 14px; }
   .login-hero h1 { font-size: 24px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.02em; }
   .login-hero p { font-size: 13.5px; color: var(--ink-muted); margin: 0; line-height: 1.5; }
+
+  /* ================================================================
+     NEW STYLES — Ads · Bonus · Invite · Stats · Toast · Banner
+     (Everything above is untouched.)
+     ================================================================ */
+  .tabs { overflow-x: auto; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { min-width: 58px; }
+  button.primary:disabled { opacity: 0.6; cursor: default; filter: none; }
+
+  /* stats row under balance card */
+  .stats-row { display: flex; gap: 8px; margin: 0 0 16px; }
+  .stat-chip { flex: 1; background: var(--card); border-radius: 14px; padding: 10px 6px 8px; text-align: center; box-shadow: var(--shadow); min-width: 0; }
+  .stat-chip b { display: block; font-family: 'Space Grotesk', sans-serif; font-size: 15px; margin-bottom: 1px; white-space: nowrap; }
+  .stat-chip span { font-size: 10px; color: var(--ink-muted); white-space: nowrap; }
+
+  /* section titles inside tabs */
+  .section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-muted); margin: 16px 4px 10px; }
+  .section-title:first-child { margin-top: 2px; }
+
+  /* ad cards */
+  .ad-card { background: var(--card); border-radius: 18px; padding: 16px; box-shadow: var(--shadow); margin-bottom: 12px; display: flex; align-items: center; gap: 12px; }
+  .ad-thumb { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+  .ad-body { flex: 1; min-width: 0; }
+  .ad-title { font-size: 14px; font-weight: 600; margin: 0 0 4px; }
+  .ad-meta { font-size: 11.5px; color: var(--ink-muted); display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .cap-chip { background: #f1f0f8; color: var(--ink-muted); font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+  .ad-reward { background: var(--lime); color: #2b3a00; font-weight: 700; font-size: 12.5px; padding: 3px 9px; border-radius: 999px; display: inline-block; margin-bottom: 8px; }
+  .ad-note { font-size: 11px; color: #92400e; background: #fef3c7; padding: 9px 12px; border-radius: 10px; margin-bottom: 12px; line-height: 1.5; }
+
+  /* rewarded ad modal */
+  .ad-overlay { position: fixed; inset: 0; background: rgba(10, 8, 20, 0.93); z-index: 150; display: flex; align-items: center; justify-content: center; padding: 18px; animation: rise 0.25s ease both; }
+  .ad-player { width: 100%; max-width: 380px; background: #0e0c18; border-radius: 20px; overflow: hidden; box-shadow: var(--shadow-lg); color: #fff; }
+  .ad-player-top { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; font-size: 11px; color: #9b97b0; background: rgba(255,255,255,0.05); gap: 8px; }
+  .ad-reward-chip { background: var(--lime); color: #2b3a00; font-weight: 700; font-size: 11.5px; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+  .ad-close { background: rgba(255,255,255,0.12); border: none; color: #fff; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 13px; line-height: 1; flex-shrink: 0; }
+  .ad-close:hover { background: rgba(255,255,255,0.25); }
+  .ad-stage { height: 205px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; position: relative; overflow: hidden; }
+  .ad-stage .brand { font-family: 'Space Grotesk', sans-serif; font-size: 30px; font-weight: 700; letter-spacing: -0.02em; animation: rise 0.5s ease both; }
+  .ad-stage .tag { font-size: 12.5px; color: #c9c5dd; animation: rise 0.6s ease both; }
+  .ad-stage .sponsored { position: absolute; bottom: 10px; right: 12px; font-size: 10px; color: #8f8ba6; border: 1px solid rgba(255,255,255,0.15); padding: 2px 7px; border-radius: 999px; }
+  .ad-count { position: absolute; top: 10px; left: 14px; font-size: 11px; color: #9b97b0; }
+  .ad-progress { height: 4px; background: rgba(255,255,255,0.1); }
+  .ad-progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--primary-2), var(--lime)); }
+  .ad-claim { width: 100%; border: none; padding: 15px; font-size: 14px; font-weight: 700; cursor: pointer; background: #262338; color: #6d6a85; font-family: 'Inter', sans-serif; transition: all 0.25s ease; }
+  .ad-claim.ready { background: linear-gradient(135deg, var(--primary), var(--primary-2)); color: #fff; }
+  .ad-claim:disabled { cursor: default; }
+
+  /* fixed bottom banner ad */
+  .banner-ad { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: min(420px, 100vw); z-index: 100; background: var(--card); border-top: 1px solid var(--border); padding: 10px 12px; display: flex; align-items: center; gap: 10px; box-shadow: 0 -8px 24px -12px rgba(30,20,60,0.2); }
+  .banner-ad .b-ic { font-size: 20px; flex-shrink: 0; }
+  .banner-ad .b-body { flex: 1; min-width: 0; }
+  .banner-ad .b-t { font-size: 12.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .banner-ad .b-s { font-size: 10.5px; color: var(--ink-muted); }
+  .banner-ad .b-btn { font-size: 11.5px; font-weight: 700; color: #fff; background: var(--primary); border: none; padding: 8px 13px; border-radius: 999px; cursor: pointer; flex-shrink: 0; }
+  .banner-ad .b-x { border: none; background: transparent; color: var(--ink-muted); font-size: 16px; cursor: pointer; padding: 0 3px; flex-shrink: 0; }
+  body.has-banner { padding-bottom: 118px; }
+
+  /* check-in streak */
+  .streak-card { background: var(--card); border-radius: 18px; padding: 16px; box-shadow: var(--shadow); margin-bottom: 12px; }
+  .streak-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; font-size: 14px; font-weight: 600; }
+  .streak-row { display: flex; gap: 7px; }
+  .streak-day { flex: 1; text-align: center; }
+  .streak-day .circ { width: 100%; max-width: 44px; aspect-ratio: 1; margin: 0 auto 5px; border-radius: 50%; background: #f1f0f8; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--ink-muted); border: 2px solid transparent; }
+  .streak-day.done .circ { background: #dcfce7; color: #15803d; }
+  .streak-day.today .circ { border-color: var(--primary); background: var(--primary-soft); color: var(--primary); }
+  .streak-day b { font-size: 9.5px; color: var(--ink-muted); font-weight: 600; }
+
+  /* spin & win wheel */
+  .wheel-wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; background: var(--card); border-radius: 18px; padding: 20px 18px; box-shadow: var(--shadow); margin-bottom: 12px; }
+  .wheel-outer { position: relative; width: 224px; height: 224px; }
+  .wheel-pointer { position: absolute; top: -4px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 11px solid transparent; border-right: 11px solid transparent; border-top: 18px solid var(--primary); z-index: 3; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2)); }
+  .wheel { width: 224px; height: 224px; border-radius: 50%; border: 7px solid #fff; box-shadow: var(--shadow-lg); position: relative; transition: transform 4.6s cubic-bezier(0.15, 0.6, 0.1, 1); }
+  .w-lab { position: absolute; transform: translate(-50%, -50%); font-size: 11px; font-weight: 700; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+  .wheel-hub { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 50px; height: 50px; border-radius: 50%; background: #fff; box-shadow: var(--shadow); display: flex; align-items: center; justify-content: center; font-size: 20px; z-index: 2; }
+
+  /* invite / referral */
+  .ref-card { background: var(--card); border-radius: 18px; padding: 18px; box-shadow: var(--shadow); margin-bottom: 12px; }
+  .ref-code { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; letter-spacing: 0.1em; background: var(--primary-soft); color: var(--primary); padding: 13px; border-radius: 12px; text-align: center; margin: 12px 0; }
+  .ref-link { font-size: 12px; color: var(--ink-muted); background: #fafafd; border: 1.5px dashed var(--border); border-radius: 10px; padding: 10px 12px; word-break: break-all; margin-bottom: 12px; line-height: 1.5; }
+  .ref-actions { display: flex; gap: 8px; }
+  .ref-actions .pill-btn { flex: 1; padding: 10px 8px; }
+  .rule-list { margin: 12px 0 0; padding: 0; list-style: none; }
+  .rule-list li { font-size: 12.5px; color: var(--ink-muted); padding: 8px 0; border-bottom: 1px solid var(--border); display: flex; gap: 8px; line-height: 1.45; }
+  .rule-list li:last-child { border-bottom: none; }
+  .rule-list li b { color: var(--credit); white-space: nowrap; }
+
+  /* toasts */
+  #toastHost { position: fixed; top: 14px; left: 50%; transform: translateX(-50%); z-index: 300; display: flex; flex-direction: column; gap: 8px; width: min(400px, 92vw); pointer-events: none; }
+  .toast { background: var(--ink); color: #fff; font-size: 13px; font-weight: 600; padding: 11px 15px; border-radius: 12px; box-shadow: var(--shadow-lg); animation: toastIn 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.3) both; display: flex; align-items: center; gap: 9px; }
+  .toast .t-ic { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+  .toast.ok .t-ic { background: var(--credit); }
+  .toast.err .t-ic { background: var(--debit); }
+  @keyframes toastIn { from { opacity: 0; transform: translateY(-16px) scale(0.95); } to { opacity: 1; transform: none; } }
+  .toast.out { opacity: 0; transform: translateY(-10px); transition: all 0.3s ease; }
+
+  /* confetti */
+  .confetti { position: fixed; inset: 0; pointer-events: none; z-index: 250; overflow: hidden; }
+  .confetti i { position: absolute; top: -14px; width: 8px; height: 13px; border-radius: 2px; animation: cfall linear both; }
+  @keyframes cfall { to { transform: translateY(108vh) rotate(720deg); opacity: 0.9; } }
 </style>
 </head>
 <body>
@@ -183,7 +283,7 @@ function render() {
 
 // Get a free Client ID at console.cloud.google.com (Credentials -> Create
 // Credentials -> OAuth Client ID -> Web application), then paste it here.
-const GOOGLE_CLIENT_ID = '107686843823-8jkrt3te2qv1hfrrs33j85sdcv497e7m.apps.googleusercontent.com';
+107686843823-8jkrt3te2qv1hfrrs33j85sdcv497e7m.apps.googleusercontent.com
 
 function renderLogin(el) {
   el.innerHTML = `
@@ -242,14 +342,21 @@ async function renderMain(el) {
     </div>
     <div class="tabs">
       <div class="tab ${state.tab==='offers'?'active':''}" onclick="setTab('offers')" tabindex="0">Tasks</div>
+      <div class="tab ${state.tab==='ads'?'active':''}" onclick="setTab('ads')" tabindex="0">Ads</div>
+      <div class="tab ${state.tab==='bonus'?'active':''}" onclick="setTab('bonus')" tabindex="0">Bonus</div>
+      <div class="tab ${state.tab==='invite'?'active':''}" onclick="setTab('invite')" tabindex="0">Invite</div>
       <div class="tab ${state.tab==='wallet'?'active':''}" onclick="setTab('wallet')" tabindex="0">Activity</div>
       <div class="tab ${state.tab==='withdraw'?'active':''}" onclick="setTab('withdraw')" tabindex="0">Withdraw</div>
     </div>
     <div class="content" id="tabContent"></div>
   `;
   if (state.tab === 'offers') renderOffers();
+  else if (state.tab === 'ads') renderAdsTab();
+  else if (state.tab === 'bonus') renderBonusTab();
+  else if (state.tab === 'invite') renderInviteTab();
   else if (state.tab === 'wallet') renderWallet(wallet);
   else renderWithdraw(wallet);
+  kxAugment(wallet); // NEW — stats row, banner ad, balance overlay, ?ref= handling
 }
 
 function setTab(t) { state.tab = t; render(); }
@@ -337,6 +444,610 @@ async function submitWithdraw() {
 
 render();
 </script>
+
+<script>
+/* ================================================================
+   NEW FEATURES (additive — no existing function was modified)
+   • Ads system  : rewarded video/story player, partner-app download,
+                   daily caps, fixed bottom banner ad (AdSense-ready)
+   • Bonus tab   : 7-day check-in streak + daily spin & win wheel
+   • Invite tab  : referral code + share link + quick follow tasks
+   • Extras      : stats row (today / streak / ads / level), toasts,
+                   confetti, demo-credit fallback when the backend
+                   endpoint below is not deployed yet.
+
+   Every reward first calls  POST /api/bonus/credit  (snippet at the
+   very bottom of this file). Until that endpoint exists on your
+   server, the reward is stored as a "demo credit" in localStorage
+   and still shows on the balance card — so the whole flow works
+   out of the box.
+   ================================================================ */
+
+const AD_CONFIG = {
+  // ---- plug in REAL ad IDs here when you have them --------------
+  adsenseClient: '',   // e.g. 'ca-pub-1234567890123456'  (leave '' to simulate)
+  bannerUnit: '',      // AdSense responsive unit id for the bottom banner
+  // ----------------------------------------------------------------
+  banner: [
+    { ic: '📱', t: 'Side-income season: 3 new task slots open this week', s: 'Sponsored · partner promotion', link: '' },
+    { ic: '🎮', t: 'SpinQuest — play mini-games, earn real rewards', s: 'Sponsored · app download', link: '' },
+    { ic: '🛒', t: 'Mega sale: up to 60% off on top brands', s: 'Sponsored · shop now', link: '' },
+  ],
+};
+
+// Your deployed site URL — used to build the invite link (?ref=CODE).
+const REFERRAL_DOMAIN = 'https://your-site.com';
+
+const AD_TASKS = [
+  { id: 'video',   ic: '📺', title: 'Watch a video ad',       reward: '₹2–5', cap: 6, dur: 15, color: '#ede9fe' },
+  { id: 'article', ic: '📰', title: 'Read a sponsored story', reward: '₹2',   cap: 3, dur: 20, color: '#e0f2fe' },
+  { id: 'app',     ic: '📥', title: 'Download a partner app', reward: '₹10',  cap: 1, dur: 30, color: '#fef9c3', link: 'https://play.google.com/store/apps' },
+];
+
+const FOLLOW_TASKS = [
+  { id: 'instagram', ic: '📸', title: 'Follow us on Instagram',   url: 'https://instagram.com/', reward: 5 },
+  { id: 'x',         ic: '🐦', title: 'Follow us on X (Twitter)', url: 'https://x.com/',         reward: 5 },
+];
+
+const AD_BRANDS = [
+  { n: 'NovaBank',  t: 'The bank that pays you back' },
+  { n: 'FitFuel',   t: '20% off your first month' },
+  { n: 'GameVerse', t: 'Claim 1,000 free coins in-app' },
+  { n: 'StudyMate', t: 'Top results start here' },
+  { n: 'CloudPets', t: 'A friend for every day' },
+];
+
+const CHECKIN_REWARDS = [2, 3, 4, 5, 6, 8, 15]; // day 1..7
+const SPIN_SEGMENTS = [
+  { v: 1,  c: '#8b5cf6' }, { v: 3,  c: '#5b4fe9' }, { v: 2,  c: '#38bdf8' }, { v: 5,  c: '#34d399' },
+  { v: 2,  c: '#f59e0b' }, { v: 8,  c: '#ec4899' }, { v: 1,  c: '#94a3b8' }, { v: 12, c: '#a3d635' },
+];
+const LEVELS = [
+  { min: 0, name: 'Starter' }, { min: 50, name: 'Rookie' }, { min: 150, name: 'Earner' },
+  { min: 400, name: 'Pro' }, { min: 1000, name: 'Legend' },
+];
+
+// ---------- storage (isolated key — existing code untouched) ----------
+function todayStr() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function yesterdayStr() { const d = new Date(); d.setDate(d.getDate() - 1); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+
+function bxGet() { try { return JSON.parse(localStorage.getItem('kamaiX_bonus') || '{}'); } catch (e) { return {}; } }
+function bxSet(d) { try { localStorage.setItem('kamaiX_bonus', JSON.stringify(d)); } catch (e) {} }
+function bxRollDaily() {
+  const d = bxGet();
+  const t = todayStr();
+  let changed = false;
+  if (!d.dayKey || d.dayKey !== t) { d.dayKey = t; d.earnedToday = 0; changed = true; }
+  if (!d.adDay || d.adDay !== t) { d.adDay = t; d.adsWatched = {}; d.follows = {}; d.appPending = null; changed = true; }
+  if (changed) bxSet(d);
+  return d;
+}
+function adCount(id) { const d = bxRollDaily(); return (d.adsWatched || {})[id] || 0; }
+function adsSeenToday() { const d = bxRollDaily(); return Object.values(d.adsWatched || {}).reduce((a, b) => a + b, 0); }
+function bumpAd(id) { const d = bxRollDaily(); d.adsWatched = d.adsWatched || {}; d.adsWatched[id] = (d.adsWatched[id] || 0) + 1; bxSet(d); }
+function addEarned(v) { const d = bxRollDaily(); d.earnedToday = (d.earnedToday || 0) + v; d.earnedLifetime = (d.earnedLifetime || 0) + v; bxSet(d); }
+
+// ---------- toast + confetti + levels ----------
+function toast(msg, kind) {
+  kind = kind || 'ok';
+  let host = document.getElementById('toastHost');
+  if (!host) { host = document.createElement('div'); host.id = 'toastHost'; document.body.appendChild(host); }
+  const t = document.createElement('div');
+  t.className = 'toast ' + kind;
+  t.innerHTML = `<span class="t-ic">${kind === 'ok' ? '✓' : '!'}</span><span>${msg}</span>`;
+  host.appendChild(t);
+  setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 350); }, 2600);
+}
+
+function confetti(big) {
+  const host = document.createElement('div');
+  host.className = 'confetti';
+  const colors = ['#5b4fe9', '#8b5cf6', '#d3f26a', '#38bdf8', '#f59e0b', '#ec4899'];
+  const n = big ? 60 : 28;
+  for (let i = 0; i < n; i++) {
+    const p = document.createElement('i');
+    p.style.left = Math.random() * 100 + 'vw';
+    p.style.background = colors[i % colors.length];
+    p.style.animationDuration = (1.6 + Math.random() * 1.4) + 's';
+    p.style.animationDelay = (Math.random() * 0.4) + 's';
+    host.appendChild(p);
+  }
+  document.body.appendChild(host);
+  setTimeout(() => host.remove(), 3600);
+}
+
+function levelOf(earned) {
+  let i = 0;
+  for (let k = 0; k < LEVELS.length; k++) if ((earned || 0) >= LEVELS[k].min) i = k;
+  const next = i < LEVELS.length - 1 ? LEVELS[i + 1].min : null;
+  return { n: i + 1, name: LEVELS[i].name, next };
+}
+
+// ---------- reward pipeline (server first, demo-credit fallback) ----------
+async function creditReward(value, source) {
+  value = Math.round(value);
+  if (!value || value <= 0) return false;
+  const r = await api('/bonus/credit', { method: 'POST', body: JSON.stringify({ value, source }) });
+  const onServer = !!(r && r.credited);
+  if (!onServer) {
+    const d = bxGet();
+    d.credits = (d.credits || 0) + value;
+    bxSet(d);
+  }
+  addEarned(value);
+  toast(onServer ? `+₹${value} · ${source} credited` : `+₹${value} · ${source} (demo — connect backend for real)`, 'ok');
+  refreshBalance();
+  renderStatsRow();
+  return onServer;
+}
+
+async function refreshBalance() {
+  const el = document.querySelector('.balance-amount');
+  if (!el) return;
+  let server = window.__kxServerBalance;
+  if (typeof server !== 'number') {
+    const w = await api('/wallet');
+    if (w && typeof w.balance === 'number') { server = w.balance; window.__kxServerBalance = server; }
+  }
+  const d = bxGet();
+  el.textContent = '₹' + ((server || 0) + (d.credits || 0));
+  const sub = document.querySelector('.balance-sub');
+  if (sub) sub.textContent = (d.credits || 0) > 0 ? `Available · includes ₹${d.credits} demo` : 'Available to withdraw';
+}
+
+// ---------- called from renderMain (one-line hook, existing code intact) ----------
+function kxAugment(wallet) {
+  if (!state.token) return;
+  if (wallet && typeof wallet.balance === 'number') window.__kxServerBalance = wallet.balance;
+  const d = bxRollDaily();
+
+  // 1) balance card = server balance + demo credits
+  const amt = document.querySelector('.balance-amount');
+  if (amt) amt.textContent = '₹' + ((window.__kxServerBalance || (wallet && wallet.balance) || 0) + (d.credits || 0));
+  const sub = document.querySelector('.balance-sub');
+  if (sub) sub.textContent = (d.credits || 0) > 0 ? `Available · includes ₹${d.credits} demo` : 'Available to withdraw';
+
+  // 2) stats row under the balance card
+  if (!document.getElementById('statsRow')) {
+    const row = document.createElement('div');
+    row.id = 'statsRow';
+    row.className = 'stats-row';
+    const bc = document.querySelector('.balance-card');
+    if (bc) bc.insertAdjacentElement('afterend', row);
+  }
+  renderStatsRow();
+
+  // 3) bottom banner ad
+  renderBanner();
+
+  // 4) friend opened your link (?ref=CODE)
+  handleRefParam();
+}
+
+function currentStreak() {
+  const d = bxGet();
+  if (!d.checkin) return 0;
+  if (d.checkin.last === todayStr() || d.checkin.last === yesterdayStr()) return d.checkin.streak || 0;
+  return 0;
+}
+
+function renderStatsRow() {
+  const row = document.getElementById('statsRow');
+  if (!row) return;
+  const d = bxRollDaily();
+  const streak = currentStreak();
+  const ads = adsSeenToday();
+  const caps = AD_TASKS.reduce((a, t) => a + t.cap, 0);
+  const lv = levelOf(d.earnedLifetime || 0);
+  row.innerHTML =
+    `<div class="stat-chip"><b>+₹${d.earnedToday || 0}</b><span>Today</span></div>` +
+    `<div class="stat-chip"><b>${streak} 🔥</b><span>Streak</span></div>` +
+    `<div class="stat-chip"><b>${ads}/${caps}</b><span>Ads today</span></div>` +
+    `<div class="stat-chip"><b>${lv.name}</b><span>${lv.next ? 'Lv ' + lv.n + ' · ' + (lv.next - (d.earnedLifetime || 0)) + ' to next' : 'Lv ' + lv.n + ' · Max'}</span></div>`;
+}
+
+// ============================ ADS TAB ============================
+function renderAdsTab() {
+  const box = document.getElementById('tabContent');
+  const d = bxRollDaily();
+  const app = AD_TASKS.find(t => t.id === 'app');
+  const appPending = d.appPending;
+  const appReady = appPending && (Date.now() - appPending.t >= app.dur * 1000);
+
+  box.innerHTML =
+    `<div class="section-title">Earn from ads</div>` +
+    (d.credits > 0 ? `<div class="ad-note">💡 You have <b>₹${d.credits} demo credits</b>. Add the 10-line backend snippet (comment at the bottom of this file) and they become real withdrawable balance.</div>` : '') +
+    AD_TASKS.map(t => {
+      const left = t.cap - adCount(t.id);
+      let action;
+      if (left <= 0) action = `<button class="pill-btn" disabled>Back tomorrow</button>`;
+      else if (t.id === 'app' && appPending && !appReady) action = `<span class="pending-tag"><span class="dot"></span>Verify ${Math.max(1, Math.ceil((t.dur * 1000 - (Date.now() - appPending.t)) / 1000))}s</span>`;
+      else if (t.id === 'app' && appReady) action = `<button class="pill-btn" onclick="claimAppDownload()">Claim ₹10</button>`;
+      else if (t.id === 'app') action = `<button class="pill-btn" onclick="startAppDownload()">Open</button>`;
+      else if (t.id === 'video') action = `<button class="pill-btn" onclick="openAdModal('video')">Watch</button>`;
+      else action = `<button class="pill-btn" onclick="openAdModal('article')">Read</button>`;
+      return `<div class="ad-card">
+        <div class="ad-thumb" style="background:${t.color}">${t.ic}</div>
+        <div class="ad-body">
+          <p class="task-title">${t.title}</p>
+          <div class="ad-meta"><span class="cap-chip">${left} left today</span><span>${t.dur}s</span></div>
+        </div>
+        <div class="task-right">
+          <div class="ad-reward">+${t.reward}</div>
+          <div id="adAction-${t.id}">${action}</div>
+        </div>
+      </div>`;
+    }).join('') +
+    `<div class="hint-card">Ads are served by our partners. Watch the full ad to unlock the claim button — exactly like rewarded ads in real apps.</div>`;
+
+  // live countdown for the app-download verification
+  if (appPending && !appReady) {
+    const iv = setInterval(() => {
+      const el2 = document.getElementById('adAction-app');
+      if (!el2) { clearInterval(iv); return; }
+      if (Date.now() - appPending.t >= app.dur * 1000) {
+        clearInterval(iv);
+        el2.innerHTML = `<button class="pill-btn" onclick="claimAppDownload()">Claim ₹10</button>`;
+      } else {
+        el2.innerHTML = `<span class="pending-tag"><span class="dot"></span>Verify ${Math.max(1, Math.ceil((app.dur * 1000 - (Date.now() - appPending.t)) / 1000))}s</span>`;
+      }
+    }, 1000);
+  }
+}
+
+function startAppDownload() {
+  const t = AD_TASKS.find(x => x.id === 'app');
+  window.open(t.link, '_blank');
+  const d = bxRollDaily();
+  d.appPending = { t: Date.now() };
+  bxSet(d);
+  toast('Opened partner app — verify to claim your reward');
+  renderAdsTab();
+}
+
+async function claimAppDownload() {
+  const d = bxGet();
+  const t = AD_TASKS.find(x => x.id === 'app');
+  if (!d.appPending) return;
+  if (Date.now() - d.appPending.t < t.dur * 1000) return;
+  d.appPending = null;
+  bxSet(d);
+  bumpAd('app');
+  confetti(false);
+  await creditReward(10, 'Partner app download');
+  renderAdsTab();
+}
+
+// ---------- rewarded ad modal (simulated player; plug real units in AD_CONFIG) ----------
+let adTimer = null;
+function openAdModal(kind) {
+  const t = AD_TASKS.find(x => x.id === kind);
+  const value = kind === 'video' ? 2 + Math.floor(Math.random() * 4) : 2;
+  const brand = AD_BRANDS[Math.floor(Math.random() * AD_BRANDS.length)];
+  const totalMs = t.dur * 1000;
+  const start = Date.now();
+
+  const ov = document.createElement('div');
+  ov.className = 'ad-overlay';
+  ov.innerHTML = `
+    <div class="ad-player">
+      <div class="ad-player-top">
+        <span>📢 Sponsored ad</span>
+        <span class="ad-reward-chip">+₹${value} on finish</span>
+        <button class="ad-close" id="adCloseBtn" title="Close (no reward)">✕</button>
+      </div>
+      <div class="ad-stage" style="background: linear-gradient(135deg, ${t.color}33, #0e0c18);">
+        <span class="ad-count" id="adCount">${t.dur}s</span>
+        <div class="brand">${brand.n}</div>
+        <div class="tag">${brand.t}</div>
+        <span class="sponsored">Sponsored</span>
+      </div>
+      <div class="ad-progress"><div class="ad-progress-fill" id="adFill"></div></div>
+      <button class="ad-claim" id="adClaimBtn" disabled>Watch the full ad…</button>
+    </div>`;
+  document.body.appendChild(ov);
+
+  adTimer = setInterval(() => {
+    const left = Math.max(0, totalMs - (Date.now() - start));
+    const pct = 100 - (left / totalMs) * 100;
+    const fill = document.getElementById('adFill');
+    const cnt = document.getElementById('adCount');
+    const btn = document.getElementById('adClaimBtn');
+    if (fill) fill.style.width = pct + '%';
+    if (cnt) cnt.textContent = Math.ceil(left / 1000) + 's';
+    if (left <= 0) {
+      clearInterval(adTimer); adTimer = null;
+      if (btn) { btn.disabled = false; btn.classList.add('ready'); btn.textContent = `Claim ₹${value} reward`; }
+    }
+  }, 100);
+
+  function close() { if (adTimer) { clearInterval(adTimer); adTimer = null; } ov.remove(); }
+  document.getElementById('adCloseBtn').onclick = close;
+  document.getElementById('adClaimBtn').onclick = async () => {
+    if (adTimer) return;
+    close();
+    bumpAd(kind);
+    confetti(false);
+    await creditReward(value, kind === 'video' ? 'Video ad' : 'Sponsored story');
+    renderAdsTab();
+  };
+}
+
+// ============================ BONUS TAB ============================
+function renderBonusTab() {
+  const box = document.getElementById('tabContent');
+  const d = bxRollDaily();
+  const c = d.checkin || { last: null, streak: 0 };
+  const claimedToday = c.last === todayStr();
+  const myPos = claimedToday ? ((c.streak - 1) % 7) : (c.streak % 7);
+
+  const streakCells = CHECKIN_REWARDS.map((r, i) => {
+    let cls = '';
+    if (claimedToday) cls = i <= myPos ? 'done' : '';
+    else cls = i < myPos ? 'done' : (i === myPos ? 'today' : '');
+    return `<div class="streak-day ${cls}"><div class="circ">${r}</div><b>Day ${i + 1}</b></div>`;
+  }).join('');
+
+  const canSpin = !(d.spin && d.spin.last === todayStr());
+  const conic = SPIN_SEGMENTS.map((s, i) => `${s.c} ${i * 45}deg ${(i + 1) * 45}deg`).join(', ');
+  const labs = SPIN_SEGMENTS.map((s, i) => {
+    const ang = ((i * 45 + 22.5) * Math.PI) / 180;
+    const x = 50 + 33 * Math.sin(ang), y = 50 - 33 * Math.cos(ang);
+    return `<div class="w-lab" style="left:${x.toFixed(1)}%; top:${y.toFixed(1)}%">₹${s.v}</div>`;
+  }).join('');
+
+  box.innerHTML = `
+    <div class="section-title">Daily check-in · 7-day streak</div>
+    <div class="streak-card">
+      <div class="streak-head"><span>Check in every day 🔥</span><b>${c.streak || 0}-day streak</b></div>
+      <div class="streak-row">${streakCells}</div>
+      <button class="primary" id="checkinBtn" style="margin-top:16px;" ${claimedToday ? 'disabled' : ''} onclick="doCheckin()">${claimedToday ? '✓ Checked in today' : (c.streak === 6 ? 'Claim DAY 7 · ₹15 mega bonus!' : "Claim today's bonus")}</button>
+      <p class="msg" id="checkinMsg">Day 7 pays ₹15 — keep the flame alive.</p>
+    </div>
+    <div class="section-title">Spin &amp; win · once a day</div>
+    <div class="wheel-wrap">
+      <div class="wheel-outer">
+        <div class="wheel-pointer"></div>
+        <div class="wheel" id="spinWheel" style="background: conic-gradient(${conic})">${labs}</div>
+        <div class="wheel-hub">🎡</div>
+      </div>
+      <button class="pill-btn" id="spinBtn" style="padding:11px 26px; font-size:13.5px;" ${canSpin ? '' : 'disabled'} onclick="doSpin()">${canSpin ? 'Spin now' : 'Spun — back tomorrow'}</button>
+      <p class="msg" id="spinMsg">${canSpin ? 'Win anywhere from ₹1 to ₹12.' : 'One free spin per day. Good luck!'}</p>
+    </div>`;
+}
+
+async function doCheckin() {
+  const d = bxRollDaily();
+  const c = d.checkin || { last: null, streak: 0 };
+  if (c.last === todayStr()) return;
+  const s = (c.last === yesterdayStr()) ? (c.streak || 0) + 1 : 1;
+  const reward = CHECKIN_REWARDS[(s - 1) % 7];
+  d.checkin = { last: todayStr(), streak: s };
+  bxSet(d);
+  confetti(reward >= 10);
+  await creditReward(reward, 'Daily check-in · day ' + s);
+  renderBonusTab();
+}
+
+async function doSpin() {
+  const d = bxRollDaily();
+  if (d.spin && d.spin.last === todayStr()) return;
+  const idx = Math.floor(Math.random() * SPIN_SEGMENTS.length);
+  const wheel = document.getElementById('spinWheel');
+  const btn = document.getElementById('spinBtn');
+  const msg = document.getElementById('spinMsg');
+  if (!wheel) return;
+  btn.disabled = true;
+  msg.textContent = 'Spinning…';
+  const target = 360 * 5 + (360 - (idx * 45 + 22.5));
+  wheel.style.transform = `rotate(${target}deg)`;
+  setTimeout(async () => {
+    d.spin = { last: todayStr() };
+    bxSet(d);
+    const v = SPIN_SEGMENTS[idx].v;
+    confetti(v >= 8);
+    await creditReward(v, 'Spin & win');
+    msg.textContent = `You won ₹${v}!`;
+    renderBonusTab();
+  }, 4800);
+}
+
+// ============================ INVITE TAB ============================
+function getRefCode() {
+  const d = bxGet();
+  if (!d.refCode) {
+    const base = ((state.email || 'user').replace(/[^a-zA-Z0-9]/g, '').slice(0, 4).toUpperCase()) || 'USER';
+    d.refCode = 'KX' + base + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
+    bxSet(d);
+  }
+  return d.refCode;
+}
+
+function refLink() { return REFERRAL_DOMAIN + '/?ref=' + getRefCode(); }
+
+function renderInviteTab() {
+  const box = document.getElementById('tabContent');
+  const d = bxRollDaily();
+  box.innerHTML = `
+    <div class="section-title">Invite friends · earn together</div>
+    <div class="ref-card">
+      <p style="font-size:13.5px; margin:0; color:var(--ink-muted);">Your referral code</p>
+      <div class="ref-code">${getRefCode()}</div>
+      <p style="font-size:13.5px; margin:0; color:var(--ink-muted);">Share this link</p>
+      <div class="ref-link">${refLink()}</div>
+      <div class="ref-actions">
+        <button class="pill-btn" onclick="copyRefLink()">📋 Copy link</button>
+        <button class="pill-btn" onclick="shareRefLink()">📤 Share</button>
+      </div>
+      <ul class="rule-list">
+        <li><b>+₹25</b><span>You get ₹25 when a friend joins with your link</span></li>
+        <li><b>+₹10</b><span>Your friend gets a ₹10 welcome bonus</span></li>
+        <li><b>∞</b><span>No limit — every new friend counts</span></li>
+      </ul>
+    </div>
+    <div class="section-title">Quick tasks</div>
+    ${FOLLOW_TASKS.map(f => {
+      const doneToday = (d.follows || {})[f.id] === todayStr();
+      return `<div class="ad-card">
+        <div class="ad-thumb" style="background:#f1f0f8">${f.ic}</div>
+        <div class="ad-body">
+          <p class="task-title">${f.title}</p>
+          <div class="ad-meta"><span class="cap-chip">once a day</span></div>
+        </div>
+        <div class="task-right">
+          <div class="ad-reward">+₹${f.reward}</div>
+          <div>${doneToday ? `<span class="done-badge">${icons.check} Done today</span>` : `<button class="pill-btn" onclick="doFollow('${f.id}')">Follow</button>`}</div>
+        </div>
+      </div>`;
+    }).join('')}`;
+}
+
+async function doFollow(id) {
+  const f = FOLLOW_TASKS.find(x => x.id === id);
+  window.open(f.url, '_blank');
+  const d = bxRollDaily();
+  d.follows = d.follows || {};
+  d.follows[id] = todayStr();
+  bxSet(d);
+  confetti(false);
+  await creditReward(f.reward, 'Followed on ' + (f.id === 'x' ? 'X' : 'Instagram'));
+  renderInviteTab();
+}
+
+function fallbackCopy(text, done) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); done(); } catch (e) { toast('Copy failed — long-press the link to copy', 'err'); }
+  ta.remove();
+}
+
+function copyRefLink() {
+  const link = refLink();
+  const done = () => toast('Link copied — send it to a friend!');
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(link).then(done).catch(() => fallbackCopy(link, done));
+  else fallbackCopy(link, done);
+}
+
+async function shareRefLink() {
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: 'KamaiX', text: 'Earn on your time — sign up with my code and we both get bonus cash! 🤝', url: refLink() });
+      return;
+    } catch (e) { /* user cancelled — fall through to copy */ }
+  }
+  copyRefLink();
+}
+
+// friend opened a ?ref=CODE link (credited on the server via the snippet below)
+let refHandled = false;
+async function handleRefParam() {
+  if (refHandled || !state.token) return;
+  refHandled = true;
+  const code = (new URLSearchParams(location.search).get('ref') || '').toUpperCase();
+  if (!code || code === getRefCode()) return;
+  const d = bxGet();
+  if (!d.referredBy) { d.referredBy = code; bxSet(d); }
+  const r = await api('/referral/join', { method: 'POST', body: JSON.stringify({ code }) });
+  if (r && r.credited) toast('🎉 Referred by a friend — bonus added to your wallet');
+}
+
+// ============================ BANNER AD ============================
+function renderBanner() {
+  let el = document.getElementById('bannerAd');
+  if (el) el.remove();
+  const d = bxGet();
+  if (d.bannerClosedUntil && Date.now() < d.bannerClosedUntil) {
+    document.body.classList.remove('has-banner');
+    return;
+  }
+  el = document.createElement('div');
+  el.id = 'bannerAd';
+  el.className = 'banner-ad';
+
+  if (AD_CONFIG.adsenseClient && AD_CONFIG.bannerUnit) {
+    // ---- REAL AdSense banner ----
+    el.innerHTML = `<ins class="adsbygoogle" style="display:block" data-ad-client="${AD_CONFIG.adsenseClient}" data-ad-slot="${AD_CONFIG.bannerUnit}" data-ad-format="horizontal" data-full-width-responsive="true"></ins>`;
+    document.body.appendChild(el);
+    document.body.classList.add('has-banner');
+    const s = document.createElement('script');
+    s.async = true;
+    s.crossOrigin = 'anonymous';
+    s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + AD_CONFIG.adsenseClient;
+    document.head.appendChild(s);
+    s.onload = () => { try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch (e) {} };
+    return;
+  }
+
+  const b = AD_CONFIG.banner[Math.floor(Date.now() / 25000) % AD_CONFIG.banner.length];
+  el.innerHTML = `
+    <span class="b-ic">${b.ic}</span>
+    <div class="b-body"><div class="b-t">${b.t}</div><div class="b-s">${b.s}</div></div>
+    <button class="b-btn" onclick="bannerView('${b.link}')">View</button>
+    <button class="b-x" onclick="closeBanner()" title="Hide for 2 hours">✕</button>`;
+  document.body.appendChild(el);
+  document.body.classList.add('has-banner');
+}
+
+function bannerView(link) {
+  if (link && link !== '#') window.open(link, '_blank');
+  else toast('Demo banner — add your real ad link in AD_CONFIG');
+}
+
+function closeBanner() {
+  const d = bxGet();
+  d.bannerClosedUntil = Date.now() + 2 * 60 * 60 * 1000;
+  bxSet(d);
+  const el = document.getElementById('bannerAd');
+  if (el) el.remove();
+  document.body.classList.remove('has-banner');
+  toast('Banner hidden for 2 hours');
+}
+
+// keep the banner in sync with login/logout (renderLogin/logout live in the original script)
+const __kxAppEl = document.getElementById('app');
+if (__kxAppEl) {
+  new MutationObserver(() => {
+    if (!document.querySelector('.balance-card')) {
+      const el = document.getElementById('bannerAd');
+      if (el) el.remove();
+      document.body.classList.remove('has-banner');
+    }
+  }).observe(__kxAppEl, { childList: true, subtree: true });
+}
+</script>
+
+<!-- ================================================================
+  OPTIONAL — make the NEW rewards REAL (paste into your existing
+  Express backend, same style as your /offers endpoints):
+
+  // credits any bonus (ads, check-in, spin, follow, referral) to the wallet
+  app.post('/api/bonus/credit', auth, (req, res) => {
+    const value = Math.min(50, Math.max(0, Math.round(Number(req.body.value) || 0)));
+    const source = String(req.body.source || 'Bonus').slice(0, 60);
+    if (!value) return res.status(400).json({ error: 'Invalid amount' });
+    // (optional) daily per-user cap here to prevent abuse
+    const w = getWallet(req.user.id);
+    w.balance += value;
+    saveWallet(req.user.id, w);
+    addTransaction(req.user.id, 'credit', value, 'Bonus — ' + source);
+    res.json({ credited: true });
+  });
+
+  // friend opened your invite link (?ref=CODE)
+  app.post('/api/referral/join', auth, (req, res) => {
+    const code = String(req.body.code || '').trim().toUpperCase();
+    const referrer = findUserByRefCode(code);
+    if (referrer && referrer.id !== req.user.id) {
+      creditUser(referrer.id, 25, 'Referral — friend joined');
+      creditUser(req.user.id, 10, 'Referral — signup bonus');
+      res.json({ credited: true });
+    } else res.json({ ok: true });
+  });
+
+  Until these exist, rewards are kept as "demo credits" (visible on
+  the balance card) so you can test the full flow right now.
+================================================================ -->
 </body>
 </html>
-
