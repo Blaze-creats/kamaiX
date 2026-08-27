@@ -267,7 +267,7 @@
 
 <script>
 // Point this at your deployed backend URL when you host the frontend as a real website.
-const API_BASE = 'http://localhost:3000/api';
+const API_BASE = 'https://kamai-passbook.onrender.com/api';
 let state = { token: safeGet('token'), email: '', tab: 'offers' };
 
 function safeGet(k) { try { return localStorage.getItem(k); } catch { return null; } }
@@ -304,7 +304,7 @@ function render() {
 
 // Get a free Client ID at console.cloud.google.com (Credentials -> Create
 // Credentials -> OAuth Client ID -> Web application), then paste it here.
-const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
+const GOOGLE_CLIENT_ID = '107686843823-8jkrt3te2qv1hfrrs33j85sdcv497e7m.apps.googleusercontent.com';
 
 function renderLogin(el) {
   el.innerHTML = `
@@ -499,7 +499,7 @@ const AD_CONFIG = {
 };
 
 // Your deployed site URL — used to build the invite link (?ref=CODE).
-const REFERRAL_DOMAIN = 'https://your-site.com';
+const REFERRAL_DOMAIN = 'https://kamai-passbook.netlify.app';
 
 const AD_TASKS = [
   { id: 'video',   ic: '📺', title: 'Watch a video ad',       reward: '₹2–5', cap: 6, dur: 15, color: '#ede9fe' },
