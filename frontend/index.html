@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -239,6 +240,26 @@
   .confetti { position: fixed; inset: 0; pointer-events: none; z-index: 250; overflow: hidden; }
   .confetti i { position: absolute; top: -14px; width: 8px; height: 13px; border-radius: 2px; animation: cfall linear both; }
   @keyframes cfall { to { transform: translateY(108vh) rotate(720deg); opacity: 0.9; } }
+
+  /* ================================================================
+     NEW STYLES — top-bar buttons, invite strip, demo banner
+     ================================================================ */
+  .top-btns { display: flex; gap: 6px; align-items: center; }
+  .mini-btn { font-size: 12px; font-weight: 700; background: var(--lime); color: #2b3a00; border: none; padding: 7px 12px; border-radius: 999px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; font-family: 'Inter', sans-serif; }
+  .mini-btn:hover { filter: brightness(0.97); }
+  .mini-btn.ghost { background: var(--card); color: var(--ink); border: 1px solid var(--border); }
+  @media (max-width: 400px) { .mini-btn span { display: none; } }
+
+  /* always-visible invite / referral strip */
+  .invite-strip { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px; background: linear-gradient(135deg, #15803d, #22c55e); color: #fff; border: none; border-radius: 16px; padding: 13px 16px; margin-bottom: 16px; font-family: 'Inter', sans-serif; font-size: 13px; cursor: pointer; box-shadow: var(--shadow); animation: rise 0.5s ease both; text-align: left; }
+  .invite-strip:hover { filter: brightness(1.05); }
+  .invite-strip .inv-l b { font-family: 'Space Grotesk', sans-serif; }
+  .invite-strip .inv-r { font-size: 11.5px; font-weight: 700; background: rgba(255,255,255,0.25); padding: 4px 11px; border-radius: 999px; white-space: nowrap; }
+
+  /* demo mode banner (backend offline) */
+  .demo-banner { display: flex; align-items: flex-start; gap: 10px; background: #fef3c7; color: #92400e; border-radius: 14px; padding: 12px 14px; margin-bottom: 14px; font-size: 12px; line-height: 1.55; box-shadow: var(--shadow); }
+  .demo-banner .mini-btn { background: #b45309; color: #fff; flex-shrink: 0; padding: 5px 10px; font-size: 11px; }
+  .demo-banner .mini-btn.retry { background: #fff; color: #b45309; border: 1px solid #fcd34d; }
 </style>
 </head>
 <body>
@@ -246,7 +267,7 @@
 
 <script>
 // Point this at your deployed backend URL when you host the frontend as a real website.
-const API_BASE = 'https://kamai-passbook.onrender.com/api';
+const API_BASE = 'http://localhost:3000/api';
 let state = { token: safeGet('token'), email: '', tab: 'offers' };
 
 function safeGet(k) { try { return localStorage.getItem(k); } catch { return null; } }
@@ -283,7 +304,7 @@ function render() {
 
 // Get a free Client ID at console.cloud.google.com (Credentials -> Create
 // Credentials -> OAuth Client ID -> Web application), then paste it here.
-107686843823-8jkrt3te2qv1hfrrs33j85sdcv497e7m.apps.googleusercontent.com
+const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
 
 function renderLogin(el) {
   el.innerHTML = `
@@ -438,8 +459,10 @@ async function submitWithdraw() {
   const upiId = document.getElementById('upi').value.trim();
   const amount = Number(document.getElementById('amt').value);
   const r = await api('/withdraw', { method: 'POST', body: JSON.stringify({ upiId, amount }) });
-  document.getElementById('wdMsg').innerText = r.error || 'Withdrawal requested — pending approval.';
-  if (!r.error) render();
+  let demoMsg = null;
+  if (r.error) demoMsg = kxTryDemoWithdraw(upiId, amount); // NEW — demo-mode fallback
+  document.getElementById('wdMsg').innerText = demoMsg || r.error || 'Withdrawal requested — pending approval.';
+  if (!r.error || demoMsg) render();
 }
 
 render();
@@ -572,6 +595,9 @@ async function creditReward(value, source) {
   if (!onServer) {
     const d = bxGet();
     d.credits = (d.credits || 0) + value;
+    d.txns = d.txns || [];
+    d.txns.push({ t: Date.now(), type: 'credit', amount: value, reason: source });
+    if (d.txns.length > 100) d.txns = d.txns.slice(-100);
     bxSet(d);
   }
   addEarned(value);
@@ -617,10 +643,64 @@ function kxAugment(wallet) {
   }
   renderStatsRow();
 
-  // 3) bottom banner ad
+  // 3) always-visible invite / referral strip (home screen)
+  if (!document.getElementById('inviteStrip')) {
+    const strip = document.createElement('button');
+    strip.id = 'inviteStrip';
+    strip.className = 'invite-strip';
+    strip.innerHTML = `<span class="inv-l">🎁 <b>Invite friends — ₹25 for each one you bring</b></span><span class="inv-r">Get code →</span>`;
+    strip.onclick = () => setTab('invite');
+    const row = document.getElementById('statsRow');
+    if (row) row.insertAdjacentElement('afterend', strip);
+  }
+
+  // 4) backend unreachable → clear demo-mode banner with fix + retry buttons
+  if (wallet && wallet.error && !document.getElementById('demoBanner')) {
+    const b = document.createElement('div');
+    b.id = 'demoBanner';
+    b.className = 'demo-banner';
+    b.innerHTML = `<span style="font-size:16px">⚠️</span><span style="flex:1"><b>Backend offline — demo mode on.</b> Earning aur buttons abhi bhi kaam karte hain (demo credits). <button class="mini-btn" onclick="openSettings()">⚙️ Server URL</button> <button class="mini-btn retry" onclick="render()">↻ Retry</button></span>`;
+    const bc = document.querySelector('.balance-card');
+    if (bc) bc.insertAdjacentElement('beforebegin', b);
+  }
+
+  // 5) Activity tab: show demo earnings when the server is unreachable
+  if (state.tab === 'wallet' && wallet && wallet.error) {
+    const box = document.getElementById('tabContent');
+    const d = bxGet();
+    const txns = d.txns || [];
+    if (box && txns.length) {
+      box.innerHTML = `<div class="section-title">Demo earnings (browser-saved)</div>` +
+        txns.slice(-20).reverse().map(t => `
+        <div class="txn-row">
+          <div class="txn-icon ${t.type}">${t.type === 'credit' ? icons.down : icons.up}</div>
+          <div class="txn-desc">${t.reason}</div>
+          <div class="txn-amt ${t.type}">${t.type === 'credit' ? '+' : '−'}₹${t.amount}</div>
+        </div>`).join('') +
+        `<div class="hint-card">Ye entries is browser mein saved hain — backend connect karte hi real wallet mein sab credits aayenge.</div>`;
+    }
+  }
+
+  // 6) Withdraw tab: show demo-credits note
+  if (state.tab === 'withdraw' && !document.getElementById('wdDemoNote')) {
+    const d = bxGet();
+    if (d.credits > 0) {
+      const fc = document.querySelector('#tabContent .form-card');
+      if (fc) {
+        const note = document.createElement('div');
+        note.id = 'wdDemoNote';
+        note.className = 'ad-note';
+        note.style.marginTop = '12px';
+        note.innerHTML = `Demo mode: aapke paas <b>₹${d.credits} demo credits</b> hain — yahan se bhi withdraw simulate ho sakta hai.`;
+        fc.appendChild(note);
+      }
+    }
+  }
+
+  // 7) bottom banner ad
   renderBanner();
 
-  // 4) friend opened your link (?ref=CODE)
+  // 8) friend opened your link (?ref=CODE)
   handleRefParam();
 }
 
